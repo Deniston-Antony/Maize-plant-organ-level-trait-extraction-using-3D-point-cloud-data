@@ -1,0 +1,25 @@
+# Only code is kept in git: scans, outputs, papers and the venv stay local.
+*
+!*/
+!.gitignore
+!*.py
+!*.ipynb
+!*.md
+!*.sh
+!*.toml
+!*.cfg
+!requirements*.txt
+!plant_structure_to_leaf_code/assets/*.png
+
+venv/
+.venv/
+**/outputs/
+**/plant_structure_to_leaf_datasets/
+__pycache__/
+.claude/
+.cursor/
+*.py[0-9]*-[0-9]*.py
+
+# separate git repositories (their own GitHub remotes)
+Research_project/
+Plot_147_potato/deniston_code/
