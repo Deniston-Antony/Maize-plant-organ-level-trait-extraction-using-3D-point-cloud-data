@@ -2,10 +2,6 @@
 
 A copy of the maize field pipeline (`../plant_structure_to_leaf_code`, made 10.11.2026) in which **one step is replaced**: the plant instances (stage 5, splitting the plant points of a date into single plants) now come from the code in `../Plant_instance_fadly_nov2026`. Every other step is the same code as the original pipeline. The original pipeline was not changed.
 
-## Credits
-
-The plant instance segmentation (stage 5) is the work of **fadly6800**: [fadly6800/maize-soil-segmentation](https://github.com/fadly6800/maize-soil-segmentation). That includes the ExtraTrees stem/leaf model, its features, and the stem-guided geometry that proposes and separates plant instances (`gap_segmentation.py`). It is used unchanged in `plant_instance_fadly/`; this pipeline only connects it (`pipeline/instances_fadly.py`).
-
 | Step | Original pipeline | Nov2026_entire_pipeline |
 |---|---|---|
 | 1-2 soil / plant | `classify_plants.py` (user's code) | same |
@@ -121,4 +117,3 @@ All changes are in `Nov2026_entire_pipeline/`; `plant_structure_to_leaf_code/` i
 | 10.11.2026 | Small plants option: per-date tick box in the app's scan list and a method choice (original separation, or instance code with heights ×1/4 and a 4 mm graph voxel); `--small-plants` / `--small-method` in the terminal; saved in `run_config.json`. | `ui/app.py`, `pipeline/runner.py`, `pipeline/instances_fadly.py`, `run_pipeline.py` |
 | 11.11.2026 | README with setup, results and this change log. | `README.md` |
 | 11.11.2026 | Flow diagram and settings tables (PDF + HTML). | `docs/` |
-| 11.11.2026 | Credits for the plant instance segmentation to fadly6800/maize-soil-segmentation. | `README.md`, `plant_instance_fadly/CREDITS.md`, `pipeline/instances_fadly.py`, `docs/` |

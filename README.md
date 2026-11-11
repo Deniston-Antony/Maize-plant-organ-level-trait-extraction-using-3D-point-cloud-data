@@ -25,8 +25,6 @@ The scans used during development (five dates in 2023: 01.06, 21.06, 29.06, 05.0
 
 Both use the same soil code (`classify_plants.py`), the same structure code and the same venv.
 
-The plant instance segmentation used in `Nov2026_entire_pipeline/` is by **fadly6800**: [fadly6800/maize-soil-segmentation](https://github.com/fadly6800/maize-soil-segmentation).
-
 ---
 
 ## Repository layout
@@ -206,4 +204,3 @@ All settings are in `pipeline/config.py`.
 | 01.11.–04.11.2026 | Complete maize field pipeline (`plant_structure_to_leaf_code/`): soil, alignment, stems and plant register, plant separation, structure with the user's code, tracking, growth, ground-truth check, report, Tkinter app. |
 | 04.11.2026 | README for the original pipeline. |
 | 10.11.2026 | `Nov2026_entire_pipeline/` added: copy of the pipeline with the plant instance step replaced by the plant_instance_fadly code; Small plants option. Details in [its change log](Nov2026_entire_pipeline/README.md#change-log). |
-| 11.11.2026 | Flow diagram / settings PDF; credits for the plant instance segmentation to fadly6800/maize-soil-segmentation. |
