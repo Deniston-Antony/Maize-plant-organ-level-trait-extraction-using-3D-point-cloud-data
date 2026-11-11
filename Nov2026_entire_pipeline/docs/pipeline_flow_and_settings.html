@@ -29,6 +29,7 @@ nav a:hover, nav a:focus-visible { border-color:var(--accent); color:var(--accen
 figure { margin:0; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; overflow-x:auto; display:grid; gap:10px; }
 figure svg { width:100%; max-width:960px; height:auto; min-width:640px; display:block; }
 figcaption { color:var(--muted); font-size:.9rem; }
+.credit { font-size:.92rem; } .credit a, .where a { color:var(--accent); }
 .where { color:var(--muted); font-size:.88rem; }
 .tw { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
 table { border-collapse:collapse; width:100%; min-width:900px; font-size:.88rem; }
@@ -56,6 +57,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 <header>
 <h1>Nov2026 maize pipeline: flow and settings</h1>
 <p class="lead">Every step of Nov2026_entire_pipeline in order, then the settings of each step: what it does and what happens when you raise or lower it. Defaults are the values in the code on 11.11.2026.</p>
+<p class="credit">Plant instance segmentation (step 5) by <strong>fadly6800</strong>: <a href="https://github.com/fadly6800/maize-soil-segmentation">fadly6800/maize-soil-segmentation</a>.</p>
 <nav aria-label="Settings by step"><a href="#global">Whole pipeline</a><a href="#soil">2 · Soil and plant separation</a><a href="#align">3 · Alignment of dates</a><a href="#stems">4 · Stems, plant register, clusters</a><a href="#inst">5 · Plant instances: instance code (normal dates)</a><a href="#own">5 · Plant instances: original separation (small-plant dates)</a><a href="#struct">6 · Structure and traits</a><a href="#gt">9 · Ground-truth check (optional)</a><a href="#fixed">Fixed rules in the instance code</a></nav>
 </header>
 <figure><svg viewBox="0 0 960 1290" role="img" aria-label="Flow of the Nov2026 maize pipeline: load, soil separation, alignment, stems and register, plant instances (instance code, or a small-plant method for ticked dates), structure, tracking, growth, optional ground-truth check, report.">
@@ -158,6 +160,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 <section id="global">
 <h2>Whole pipeline</h2>
 <p class="where">Set in: Nov2026_entire_pipeline/pipeline/config.py and the app&#x27;s Setup tab</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>REFERENCE_DATE</code></td><td class="num">230629</td><td>Date whose plant positions name the plants; every other date is aligned onto it.</td><td>Other date: pick one with clearly visible stems and soil.</td><td>01.06 aligns poorly (seedlings); 05.07 / 11.07 hide many stems.</td></tr>
@@ -169,6 +172,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="soil">
 <h2>2 · Soil and plant separation</h2>
 <p class="where">Set in: your classify_plants.py constants (maize_soil_segmentation_main/soil_segmentation/classify_plants.py); read by SoilConfig in pipeline/soil.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>CSF_MAX_POINTS</code></td><td class="num">9,000,000</td><td>Points given to the cloth filter (every n-th point of the scan).</td><td>Finer ground, slower, more memory.</td><td>Faster; ground from fewer points, small dips missed.</td></tr>
@@ -189,6 +193,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="align">
 <h2>3 · Alignment of dates</h2>
 <p class="where">Set in: AlignConfig in pipeline/align.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>cell</code></td><td class="num">0.01 m</td><td>Raster cell used for matching two dates.</td><td>Faster, shifts only in coarse steps.</td><td>Finer shifts; noisier and slower.</td></tr>
@@ -203,6 +208,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="stems">
 <h2>4 · Stems, plant register, clusters</h2>
 <p class="where">Set in: StemConfig in pipeline/stems.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>cell</code></td><td class="num">0.005 m</td><td>Cell of the stem-density map.</td><td>Close stems merge.</td><td>Noisy peaks; one stem can split in two.</td></tr>
@@ -225,6 +231,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="inst">
 <h2>5 · Plant instances: instance code (normal dates)</h2>
 <p class="where">Set in: plant_instance_fadly/ (gap_segmentation.Settings, model file, step1_downsample.py) and pipeline/instances_fadly.py</p>
+<p class="where">Code by fadly6800: <a href="https://github.com/fadly6800/maize-soil-segmentation">fadly6800/maize-soil-segmentation</a></p>
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>VOXEL (step1_downsample.py)</code></td><td class="num">0.004 m</td><td>Plant points thinned to one point per 4 mm voxel.</td><td>Faster; the model was trained at 4 mm, so labels get worse.</td><td>Slower; also differs from training.</td></tr>
@@ -254,6 +261,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="own">
 <h2>5 · Plant instances: original separation (small-plant dates)</h2>
 <p class="where">Set in: SeparateConfig in pipeline/separate.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>voxel</code></td><td class="num">0.01 m</td><td>Voxel of the plant graph.</td><td>Faster; touching plants merge.</td><td>Slower; thin parts break apart.</td></tr>
@@ -268,6 +276,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="struct">
 <h2>6 · Structure and traits</h2>
 <p class="where">Set in: PipelineConfig in Research_project/copy_of_New_optimized_plant_structure.py (your script); stem radius in pipeline/config.py and pipeline/plants_stage.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>sor_neighbors · sor_std_ratio</code></td><td class="num">20 · 2.0</td><td>Statistical outlier removal.</td><td>Ratio up: keeps more points (more noise).</td><td>Ratio down: removes more, including leaf edges.</td></tr>
@@ -291,6 +300,7 @@ code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
 </section><section id="gt">
 <h2>9 · Ground-truth check (optional)</h2>
 <p class="where">Set in: GroundTruthConfig in pipeline/config.py</p>
+
 <div class="tw"><table>
 <thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
 <tbody><tr><td><code>voxel_size</code></td><td class="num">0.004 m</td><td>Both clouds thinned before IoU.</td><td>IoU less sensitive to density.</td><td>IoU depends more on point density.</td></tr>

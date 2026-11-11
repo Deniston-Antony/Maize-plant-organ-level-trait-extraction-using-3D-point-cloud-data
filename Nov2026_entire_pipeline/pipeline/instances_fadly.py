@@ -1,5 +1,8 @@
 """Stage 5 (Nov2026 pipeline): plant instances with the plant_instance_fadly code.
 
+Credits: the plant instance segmentation code is by fadly6800,
+https://github.com/fadly6800/maize-soil-segmentation
+
 The code in ../plant_instance_fadly/ (copied unchanged from
 Plant_instance_fadly_nov2026/plant_instances_from_las) is used the way its
 README describes for a soil-removed cloud (run_from_las.py --prepared-ground-ply):
