@@ -1,0 +1,7 @@
+numpy
+scipy
+scikit-learn==1.7.2
+joblib
+matplotlib
+laspy
+cloth-simulation-filter

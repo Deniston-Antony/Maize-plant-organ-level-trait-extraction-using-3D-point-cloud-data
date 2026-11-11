@@ -23,3 +23,4 @@ __pycache__/
 # separate git repositories (their own GitHub remotes)
 Research_project/
 Plot_147_potato/deniston_code/
+!Nov2026_entire_pipeline/assets/*.png
