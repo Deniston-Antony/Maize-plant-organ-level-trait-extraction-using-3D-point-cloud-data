@@ -24,3 +24,5 @@ __pycache__/
 Research_project/
 Plot_147_potato/deniston_code/
 !Nov2026_entire_pipeline/assets/*.png
+!Nov2026_entire_pipeline/docs/*.pdf
+!Nov2026_entire_pipeline/docs/*.html

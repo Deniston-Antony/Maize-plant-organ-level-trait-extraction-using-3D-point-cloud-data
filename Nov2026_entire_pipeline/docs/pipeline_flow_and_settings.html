@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nov2026 Pipeline Flow and Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: flow diagram first, then one settings table per step (same order as the flow). */
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#1b2430; --muted:#5d6b7a; --line:#c9d1da;
+  --accent:#2d5bd7; --accent-soft:#e3eafb; --up:#1f7a4c; --dn:#b4541a;
+  --display:"Source Serif 4", Georgia, serif; --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif; --mono:"IBM Plex Mono",Menlo,monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#12171d; --panel:#1a2129; --ink:#e6ebf0; --muted:#9aa7b4; --line:#34404c;
+  --accent:#7c9cff; --accent-soft:#222c46; --up:#5cc28a; --dn:#f0a060; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg:#12171d; --panel:#1a2129; --ink:#e6ebf0; --muted:#9aa7b4; --line:#34404c;
+  --accent:#7c9cff; --accent-soft:#222c46; --up:#5cc28a; --dn:#f0a060; color-scheme: dark; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--body); }
+main { max-width:1180px; margin:0 auto; padding:32px 20px 64px; display:grid; gap:32px; }
+h1,h2 { font-family:var(--display); font-weight:600; margin:0; text-wrap:balance; }
+h1 { font-size:2rem; line-height:1.2; } h2 { font-size:1.3rem; }
+p { margin:0; max-width:75ch; } .lead { color:var(--muted); }
+header, section { display:grid; gap:12px; }
+nav { display:flex; flex-wrap:wrap; gap:8px; }
+nav a { border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:999px; padding:3px 12px; font-size:.88rem; text-decoration:none; }
+nav a:hover, nav a:focus-visible { border-color:var(--accent); color:var(--accent); outline:none; }
+figure { margin:0; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; overflow-x:auto; display:grid; gap:10px; }
+figure svg { width:100%; max-width:960px; height:auto; min-width:640px; display:block; }
+figcaption { color:var(--muted); font-size:.9rem; }
+.where { color:var(--muted); font-size:.88rem; }
+.tw { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+table { border-collapse:collapse; width:100%; min-width:900px; font-size:.88rem; }
+th, td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:1px solid var(--line); }
+th { color:var(--muted); font-weight:500; background:var(--panel); position:sticky; top:0; }
+th.up { color:var(--up); } th.dn { color:var(--dn); }
+td:nth-child(1) { width:19%; } td:nth-child(2) { width:10%; } td:nth-child(3) { width:25%; }
+tbody tr:last-child td { border-bottom:none; }
+code { font-family:var(--mono); font-size:.82rem; word-break:break-word; }
+.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+/* svg roles */
+.node { fill:var(--panel); stroke:var(--line); stroke-width:1.4; }
+.node.hl { fill:var(--accent-soft); stroke:var(--accent); }
+.dec { fill:var(--panel); stroke:var(--accent); stroke-width:1.4; }
+.edge { stroke:var(--muted); stroke-width:1.6; fill:none; }
+.edgeplain { stroke:var(--muted); stroke-width:1.6; fill:none; }
+.dotl { stroke:var(--line); stroke-width:1.2; stroke-dasharray:2 3; }
+.ah { fill:var(--muted); }
+.t { fill:var(--ink); font:12.5px var(--body); }
+.tb { fill:var(--ink); font:600 13.5px var(--body); }
+.tm { fill:var(--muted); font:12px var(--body); }
+.to { fill:var(--muted); font:11.5px var(--mono); }
+</style></head>
+<body><main>
+<header>
+<h1>Nov2026 maize pipeline: flow and settings</h1>
+<p class="lead">Every step of Nov2026_entire_pipeline in order, then the settings of each step: what it does and what happens when you raise or lower it. Defaults are the values in the code on 11.11.2026.</p>
+<nav aria-label="Settings by step"><a href="#global">Whole pipeline</a><a href="#soil">2 · Soil and plant separation</a><a href="#align">3 · Alignment of dates</a><a href="#stems">4 · Stems, plant register, clusters</a><a href="#inst">5 · Plant instances: instance code (normal dates)</a><a href="#own">5 · Plant instances: original separation (small-plant dates)</a><a href="#struct">6 · Structure and traits</a><a href="#gt">9 · Ground-truth check (optional)</a><a href="#fixed">Fixed rules in the instance code</a></nav>
+</header>
+<figure><svg viewBox="0 0 960 1290" role="img" aria-label="Flow of the Nov2026 maize pipeline: load, soil separation, alignment, stems and register, plant instances (instance code, or a small-plant method for ticked dates), structure, tracking, growth, optional ground-truth check, report.">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker></defs>
+<rect x="40" y="20" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="46" class="tb">Input</text>
+<text x="56" y="66" class="t">one LAS scan per date: 01.06 · 21.06 · 29.06 · 05.07 · 11.07</text>
+<rect x="40" y="110" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="136" class="tb">1  Load</text>
+<text x="56" y="156" class="t">coordinates relative to PROJECT_ORIGIN (float32-safe)</text>
+<rect x="40" y="200" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="226" class="tb">2  Soil / plant separation  (your classify_plants.py)</text>
+<text x="56" y="246" class="t">cloth filter (CSF) → ground model (DTM) → height above ground</text>
+<line x1="640" y1="233" x2="676" y2="233" class="dotl"/>
+<text x="684" y="237" class="to">01_soil/</text>
+<text x="684" y="254" class="to">plants.npz · dtm.npz · soil_check.png</text>
+<rect x="40" y="290" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="316" class="tb">3  Alignment of dates onto 29.06</text>
+<text x="56" y="336" class="t">stem-base layer + soil relief, matched per 1.5 m section</text>
+<line x1="640" y1="323" x2="676" y2="323" class="dotl"/>
+<text x="684" y="327" class="to">alignment/alignment.json</text>
+<rect x="40" y="380" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="406" class="tb">4  Stems → plant register → clusters</text>
+<text x="56" y="426" class="t">stems on ≥ 2 dates = register plant; clusters split at 12 cm gaps</text>
+<line x1="640" y1="413" x2="676" y2="413" class="dotl"/>
+<text x="684" y="417" class="to">02_stems_groups/stems.csv</text>
+<text x="684" y="434" class="to">tracking/plant_register.csv</text>
+<line x1="340" y1="86" x2="340" y2="108" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="176" x2="340" y2="198" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="266" x2="340" y2="288" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="356" x2="340" y2="378" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="446" x2="340" y2="470" class="edge" marker-end="url(#ar)"/>
+<polygon points="340,472 500,512 340,552 180,512" class="dec"/>
+<text x="340" y="508" class="tb" text-anchor="middle">Date ticked as</text>
+<text x="340" y="526" class="tb" text-anchor="middle">"Small plants"?</text>
+<polyline points="180,512 150,512 150,586" class="edge" marker-end="url(#ar)"/>
+<text x="160" y="504" class="tm">no</text>
+<polyline points="500,512 535,512 535,586" class="edge" marker-end="url(#ar)"/>
+<text x="508" y="504" class="tm">yes</text>
+<rect x="40" y="588" width="360" height="222" rx="8" class="node hl"/>
+<text x="56" y="614" class="tb">5  Plant instances: instance code</text>
+<text x="56" y="634" class="t">a  thin plant points to 4 mm</text>
+<text x="56" y="653" class="t">b  stem / leaf / unknown (ExtraTrees model)</text>
+<text x="56" y="672" class="t">c  stem hints from predicted stem points</text>
+<text x="56" y="691" class="t">d  candidate stem axes (upright ≥ 12 cm)</text>
+<text x="56" y="710" class="t">e  automatic review: axis → register ≤ 9 cm</text>
+<text x="56" y="729" class="t">f  plant groups by graph competition</text>
+<text x="56" y="748" class="t">g  conservative labels → one cloud per plant</text>
+<text x="56" y="767" class="t">   (plant_instance_fadly, own settings)</text>
+<rect x="420" y="588" width="220" height="222" rx="8" class="node"/>
+<text x="436" y="614" class="tb">5  Small-plant dates</text>
+<text x="436" y="634" class="t">choice in the app:</text>
+<text x="436" y="653" class="t">• original separation</text>
+<text x="436" y="672" class="t">  (voxel graph from</text>
+<text x="436" y="691" class="t">  register stems)</text>
+<text x="436" y="710" class="t">• or instance code with</text>
+<text x="436" y="729" class="t">  heights ×1/4, 4 mm</text>
+<text x="436" y="748" class="t">  graph voxel</text>
+<line x1="640" y1="700" x2="676" y2="700" class="dotl"/>
+<text x="684" y="704" class="to">03_plants/instances_fadly/</text>
+<text x="684" y="721" class="to">plants_conservative.ply</text>
+<text x="684" y="738" class="to">stem_axes_auto_review.csv</text>
+<text x="684" y="755" class="to">summary.json</text>
+<polyline points="220,810 220,834 535,834 535,810" class="edgeplain"/>
+<line x1="340" y1="834" x2="340" y2="858" class="edge" marker-end="url(#ar)"/>
+<rect x="40" y="860" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="886" class="tb">6  Structure and traits  (your structure script)</text>
+<text x="56" y="906" class="t">stem, leaves, skeleton per plant + stem radius (median circle fit)</text>
+<line x1="640" y1="893" x2="676" y2="893" class="dotl"/>
+<text x="684" y="897" class="to">03_plants/groupNN/groupNN_plantMM/</text>
+<text x="684" y="914" class="to">traits · skeleton.npz</text>
+<text x="684" y="931" class="to">03_plants/plants_traits.csv</text>
+<rect x="40" y="950" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="976" class="tb">7  Tracking and availability</text>
+<text x="56" y="996" class="t">same plant on every date: present / stem hidden / no axis / missing</text>
+<line x1="640" y1="983" x2="676" y2="983" class="dotl"/>
+<text x="684" y="987" class="to">tracking/availability.csv</text>
+<rect x="40" y="1040" width="600" height="66" rx="8" class="node"/>
+<text x="56" y="1066" class="tb">8  Growth</text>
+<text x="56" y="1086" class="t">growth curves per trait, V-stage estimate (never decreasing)</text>
+<line x1="640" y1="1073" x2="676" y2="1073" class="dotl"/>
+<text x="684" y="1077" class="to">growth/*.csv · growth figures</text>
+<line x1="340" y1="926" x2="340" y2="948" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="1016" x2="340" y2="1038" class="edge" marker-end="url(#ar)"/>
+<line x1="340" y1="1106" x2="340" y2="1128" class="edge" marker-end="url(#ar)"/>
+<rect x="40" y="1130" width="600" height="66" rx="8" class="node" stroke-dasharray="6 4"/>
+<text x="56" y="1156" class="tb">9  Ground-truth check  (optional)</text>
+<text x="56" y="1176" class="t">hand-labelled plants of 21.06: plant / stem / leaf IoU, trait errors</text>
+<line x1="640" y1="1163" x2="676" y2="1163" class="dotl"/>
+<text x="684" y="1167" class="to">ground_truth/gt_summary.csv</text>
+<line x1="340" y1="1196" x2="340" y2="1218" class="edge" marker-end="url(#ar)"/>
+<rect x="40" y="1220" width="600" height="56" rx="8" class="node"/>
+<text x="56" y="1246" class="tb">10  Report</text>
+<text x="56" y="1264" class="t">report.html: summary per date, plants, deviation / error columns</text>
+<line x1="640" y1="1248" x2="676" y2="1248" class="dotl"/>
+<text x="684" y="1252" class="to">report.html</text>
+</svg>
+<figcaption>Steps 1–4 and 6–10 are the same code as the original pipeline. Step 5 runs the plant_instance_fadly code on normal dates; dates ticked as "Small plants" use the method chosen in the app. Grey text on the right = files written by each step inside outputs/&lt;run&gt;/.</figcaption>
+</figure>
+<section id="global">
+<h2>Whole pipeline</h2>
+<p class="where">Set in: Nov2026_entire_pipeline/pipeline/config.py and the app&#x27;s Setup tab</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>REFERENCE_DATE</code></td><td class="num">230629</td><td>Date whose plant positions name the plants; every other date is aligned onto it.</td><td>Other date: pick one with clearly visible stems and soil.</td><td>01.06 aligns poorly (seedlings); 05.07 / 11.07 hide many stems.</td></tr>
+<tr><td><code>INSTANCE_METHOD</code></td><td class="num">fadly_nov2026</td><td>Which plant-instance step runs on normal dates.</td><td>—</td><td>&quot;own&quot; = the original separation (voxel graph from register stems).</td></tr>
+<tr><td><code>Small plants (app column)</code></td><td class="num">none ticked</td><td>Dates ticked here use the small-plant method below instead of the instance code.</td><td>Tick a date when its plants are under about 20 cm (01.06).</td><td>Untick: the instance code with its own settings runs (finds 0 plants on 01.06).</td></tr>
+<tr><td><code>Small-plant method</code></td><td class="num">Original separation</td><td>What ticked small-plant dates use.</td><td>&quot;Instance code ×1/4 heights&quot;: 2 plants on 01.06.</td><td>&quot;Original separation&quot;: 12 plants on 01.06.</td></tr>
+<tr><td><code>PLANT_WORKERS</code></td><td class="num">8</td><td>Plants whose structure is computed in parallel.</td><td>Faster when CPU cores are free; more memory.</td><td>Slower; less memory.</td></tr>
+<tr><td><code>USE_LEAF_CHECK</code></td><td class="num">False</td><td>Extra leaf check after your structure script (joins pieces, drops pieces not touching the stem).</td><td>True: fewer false leaves; output no longer exactly your script&#x27;s.</td><td>False: labels exactly as your structure script gives them.</td></tr></tbody></table></div>
+</section><section id="soil">
+<h2>2 · Soil and plant separation</h2>
+<p class="where">Set in: your classify_plants.py constants (maize_soil_segmentation_main/soil_segmentation/classify_plants.py); read by SoilConfig in pipeline/soil.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>CSF_MAX_POINTS</code></td><td class="num">9,000,000</td><td>Points given to the cloth filter (every n-th point of the scan).</td><td>Finer ground, slower, more memory.</td><td>Faster; ground from fewer points, small dips missed.</td></tr>
+<tr><td><code>CSF_CLOTH_RES</code></td><td class="num">0.02 m</td><td>Grid spacing of the virtual cloth.</td><td>Coarser cloth bridges the furrow and dips: soil there stays as plant. Faster.</td><td>Cloth follows small relief but can sink between plants onto stem bases: low plant parts become ground. Slower.</td></tr>
+<tr><td><code>CSF_RIGIDNESS</code></td><td class="num">1 (1–3)</td><td>Stiffness of the cloth.</td><td>2–3: flatter cloth for flat fields; furrow not followed, soil kept as plant.</td><td>1 is already the softest (follows the relief most).</td></tr>
+<tr><td><code>CSF_TIME_STEP</code></td><td class="num">0.50</td><td>Step size of the cloth simulation.</td><td>Settles faster but can overshoot.</td><td>More stable; needs more iterations.</td></tr>
+<tr><td><code>CSF_ITERATIONS</code></td><td class="num">1000</td><td>Simulation steps.</td><td>More time to settle; slower.</td><td>Cloth may not reach low spots: ground missed there.</td></tr>
+<tr><td><code>CSF_THRESHOLD</code></td><td class="num">0.012 m</td><td>Max distance to the cloth for a point to be ground.</td><td>More ground: stem bases, seedlings and leaf tips on the soil are lost.</td><td>Less ground: rough soil and clods stay as plant.</td></tr>
+<tr><td><code>DTM_CELL</code></td><td class="num">0.03 m</td><td>Cell size of the ground-height model.</td><td>Smoother ground; furrow shape lost (1–3 cm height errors).</td><td>More detail; more empty cells under plants to fill.</td></tr>
+<tr><td><code>DTM_FILL_MAX_DIST</code></td><td class="num">0.12 m</td><td>How far an empty cell (under canopy) borrows its height from.</td><td>More cells get a height, taken from farther away (less accurate).</td><td>More cells stay unknown; points there get no height and are dropped.</td></tr>
+<tr><td><code>DTM_FILL_K_NEIGHBORS</code></td><td class="num">12</td><td>An empty cell takes the lowest of this many nearest observed cells.</td><td>Lower filled ground: plants slightly taller, more low points kept.</td><td>Fill follows the closest cells; noisier.</td></tr>
+<tr><td><code>HAG_VEG_MIN</code></td><td class="num">0.020 m</td><td>Minimum height above ground for a plant point (also HAG_SOIL_MAX).</td><td>Cleaner soil, but low leaves, stem bases and seedlings are cut.</td><td>More low plant parts kept; more clods and soil bumps counted as plant.</td></tr>
+<tr><td><code>PLANT_MIN_NEIGHBORHOOD</code></td><td class="num">8 (of 9)</td><td>A plant raster cell needs this many plant cells in its 3×3 block.</td><td>9: only dense plant areas; thin stems and leaf edges lost.</td><td>Isolated specks (noise, clods) kept.</td></tr>
+<tr><td><code>USE_SIDEBAND</code></td><td class="num">False</td><td>Cut the outer sides of the bed (across the row).</td><td>True: removes the sides; X_TRIM_FRAC sets how much.</td><td>False: full bed width kept.</td></tr>
+<tr><td><code>X_TRIM_FRAC</code></td><td class="num">0.38</td><td>Share of the bed width removed on each side (only with USE_SIDEBAND).</td><td>Narrower strip: wide leaves are cut.</td><td>Wider strip: neighbouring rows and weeds kept.</td></tr>
+<tr><td><code>HARD_SIDE_CROP</code></td><td class="num">True</td><td>Sideband: remove all side points (True) or only demote plant points (False).</td><td>—</td><td>False: side points stay in the soil class.</td></tr>
+<tr><td><code>keep_low_points · borrow_hidden_ground · clean_ground_outliers</code></td><td class="num">all False</td><td>Pipeline extras on top of your script (low leaf tips, ground from an earlier date, clod removal).</td><td>True: changes the plant points; no longer exactly your script.</td><td>False: plant points exactly as classify_plants.py gives them.</td></tr></tbody></table></div>
+</section><section id="align">
+<h2>3 · Alignment of dates</h2>
+<p class="where">Set in: AlignConfig in pipeline/align.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>cell</code></td><td class="num">0.01 m</td><td>Raster cell used for matching two dates.</td><td>Faster, shifts only in coarse steps.</td><td>Finer shifts; noisier and slower.</td></tr>
+<tr><td><code>base_hag</code></td><td class="num">0.03–0.15 m</td><td>Height band of the stem-base layer that is matched.</td><td>Higher band: includes leaves, which change between dates; worse matches.</td><td>Lower band: more soil clutter, fewer stems.</td></tr>
+<tr><td><code>section_len</code></td><td class="num">1.5 m</td><td>The row is cut into sections; each is matched on its own.</td><td>Fewer, more reliable sections; drift along the row followed less.</td><td>More sections, each weaker (more ignored).</td></tr>
+<tr><td><code>max_shift</code></td><td class="num">0.30 m</td><td>Largest shift accepted.</td><td>Larger shifts allowed; risk of matching a neighbouring plant.</td><td>Fails if the real shift is larger (up to 10 cm seen).</td></tr>
+<tr><td><code>min_quality</code></td><td class="num">1.15</td><td>Match peak must be this much stronger than the second-best.</td><td>Only clear sections used (fewer, safer).</td><td>Ambiguous sections used too.</td></tr>
+<tr><td><code>agree_tol</code></td><td class="num">0.03 m</td><td>Sections within this of the consensus count as agreeing.</td><td>Outlier sections accepted.</td><td>Stricter consensus; may reject good sections.</td></tr>
+<tr><td><code>drift_min</code></td><td class="num">0.015 m</td><td>A linear drift along the row is used if it changes the shift by more than this.</td><td>Drift used less often.</td><td>Drift fitted even for tiny changes (noise).</td></tr>
+<tr><td><code>relief_sigma</code></td><td class="num">0.15 m</td><td>Smoothing removed from the soil model before matching soil relief.</td><td>Larger soil shapes (furrow) kept in the matched relief.</td><td>Only fine soil texture left to match.</td></tr>
+<tr><td><code>min_base_points_per_m</code></td><td class="num">2000</td><td>Stem layer needs this many points per metre, else soil-only matching.</td><td>Stem layer ignored more often.</td><td>Weak stem layers (seedlings) used.</td></tr></tbody></table></div>
+</section><section id="stems">
+<h2>4 · Stems, plant register, clusters</h2>
+<p class="where">Set in: StemConfig in pipeline/stems.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>cell</code></td><td class="num">0.005 m</td><td>Cell of the stem-density map.</td><td>Close stems merge.</td><td>Noisy peaks; one stem can split in two.</td></tr>
+<tr><td><code>base_hag</code></td><td class="num">0.02–0.15 m</td><td>Height band where stems are searched.</td><td>Higher: leaves enter the band, more false stems.</td><td>Lower: soil clutter, stems shorter in the band.</td></tr>
+<tr><td><code>peak_window</code></td><td class="num">0.025 m</td><td>Window for local density peaks.</td><td>Stems closer than this become one.</td><td>One stem may give two peaks.</td></tr>
+<tr><td><code>min_peak_rel</code></td><td class="num">0.04</td><td>Peak must reach this share of the 99th-percentile density.</td><td>Thin and small stems missed.</td><td>More candidates, including leaf parts and clods.</td></tr>
+<tr><td><code>col_radius</code></td><td class="num">0.015 m</td><td>Points within this of the column axis belong to the column.</td><td>Thick stems pass, but leaves near the stem too.</td><td>Thick or leaning stems fail.</td></tr>
+<tr><td><code>col_top</code></td><td class="num">0.12 m</td><td>Column is tested up to this height (or 80 % of local plant height).</td><td>Stricter; small plants fail.</td><td>Low clutter passes as stems.</td></tr>
+<tr><td><code>min_plant_height</code></td><td class="num">0.05 m</td><td>A blob must be this tall to be a plant.</td><td>Seedlings dropped as clods.</td><td>Clods kept as plants (01.06 clods &lt; 4 cm).</td></tr>
+<tr><td><code>col_min_frac</code></td><td class="num">0.7</td><td>Share of height bins that must contain points.</td><td>Partly hidden stems fail.</td><td>Leaf pieces pass.</td></tr>
+<tr><td><code>col_max_spread</code></td><td class="num">0.012 m</td><td>Max median distance of column points to the axis.</td><td>Blobs pass as stems.</td><td>Thick stems fail.</td></tr>
+<tr><td><code>col_max_lean</code></td><td class="num">0.6</td><td>Max horizontal drift per metre of height (~31°).</td><td>Leaning leaves pass.</td><td>Leaning stems fail.</td></tr>
+<tr><td><code>max_hidden_base</code></td><td class="num">0.15 m</td><td>Stem may first appear this high (base covered by leaves).</td><td>Stems hidden higher are found; more false stems from leaves.</td><td>Plants with hidden bases missed.</td></tr>
+<tr><td><code>tall_top · tall_min_frac</code></td><td class="num">0.30 m · 0.6</td><td>Second test: the column must keep rising to here, filled this much.</td><td>Stricter; short or partly hidden stems fail.</td><td>Low leaf parts pass (GT: leaves 0.32–0.43, stems 0.89–1.0).</td></tr>
+<tr><td><code>min_stem_dist</code></td><td class="num">0.025 m</td><td>Candidates closer than this are one stem.</td><td>Close plants and tillers merged.</td><td>One stem counted twice.</td></tr>
+<tr><td><code>row_max_offset</code></td><td class="num">0.10 m</td><td>Stems farther from the row centre line are weeds or leaf tips.</td><td>Weeds and leaf tips accepted.</td><td>Plants slightly off the line missed.</td></tr>
+<tr><td><code>pool_tol</code></td><td class="num">0.03 m</td><td>Stems of different dates within this are the same plant.</td><td>Neighbours merged into one register plant.</td><td>Same plant split across dates (alignment error ~1 cm).</td></tr>
+<tr><td><code>min_dates_seen</code></td><td class="num">2</td><td>A plant must be found on this many dates to enter the register.</td><td>Fewer false plants; plants seen once lost (RL_plant01).</td><td>1: single-date detections (noise) become plants.</td></tr>
+<tr><td><code>group_gap</code></td><td class="num">0.12 m</td><td>Clusters are split where stems are this far apart along the row.</td><td>Fewer, larger clusters.</td><td>More, smaller clusters.</td></tr></tbody></table></div>
+</section><section id="inst">
+<h2>5 · Plant instances: instance code (normal dates)</h2>
+<p class="where">Set in: plant_instance_fadly/ (gap_segmentation.Settings, model file, step1_downsample.py) and pipeline/instances_fadly.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>VOXEL (step1_downsample.py)</code></td><td class="num">0.004 m</td><td>Plant points thinned to one point per 4 mm voxel.</td><td>Faster; the model was trained at 4 mm, so labels get worse.</td><td>Slower; also differs from training.</td></tr>
+<tr><td><code>conf_threshold (model)</code></td><td class="num">0.55</td><td>Below this confidence a point is &#x27;unknown&#x27;.</td><td>More unknown points; fewer stem points.</td><td>More points forced into stem / leaf.</td></tr>
+<tr><td><code>smooth_k (model)</code></td><td class="num">96</td><td>Neighbours whose label probabilities are averaged.</td><td>Smoother labels; thin stems can turn leaf.</td><td>Speckled labels.</td></tr>
+<tr><td><code>ks (model)</code></td><td class="num">20, 50, 100</td><td>Neighbourhood sizes of the features.</td><td>Fixed: the model was trained with these.</td><td>Fixed (changing needs retraining).</td></tr>
+<tr><td><code>graph_voxel</code></td><td class="num">0.008 m</td><td>Voxel of the plant graph.</td><td>Faster; close stems and leaves merge.</td><td>Slower, more detail; small plants need 4 mm.</td></tr>
+<tr><td><code>neighbours</code></td><td class="num">18</td><td>Neighbours for local shape (normals, line-likeness).</td><td>Smoother shapes; leaf edges blurred.</td><td>Noisy shapes.</td></tr>
+<tr><td><code>local_radius</code></td><td class="num">0.022 m</td><td>Longest edge in the surface graph.</td><td>More connections; touching leaves of neighbours join.</td><td>Graph falls into pieces (more gap bridges needed).</td></tr>
+<tr><td><code>max_gap</code></td><td class="num">0.070 m</td><td>Longest bridge across scan gaps.</td><td>More gaps bridged; risk of jumping to a neighbour.</td><td>Cut-off leaf pieces stay unassigned.</td></tr>
+<tr><td><code>normal_penalty</code></td><td class="num">3.0</td><td>Extra cost for paths that cross surfaces or turn sharply.</td><td>Paths stay on one leaf (better at contacts); curved leaves may break.</td><td>More like plain distance; crosses between touching leaves.</td></tr>
+<tr><td><code>gap_multiplier</code></td><td class="num">3.0</td><td>Cost factor of gap bridges.</td><td>Bridges used only when there is no other path.</td><td>Bridges cheap: shortcuts between plants.</td></tr>
+<tr><td><code>margin_threshold</code></td><td class="num">0.12</td><td>Relative cost gap between best and second-best plant needed to assign a point.</td><td>More points ambiguous (unassigned in conservative labels).</td><td>More points assigned; more errors where plants touch.</td></tr>
+<tr><td><code>minimum_cost_difference</code></td><td class="num">0.015</td><td>Absolute cost gap needed (same idea as above).</td><td>More ambiguous points.</td><td>More assigned points, more errors.</td></tr>
+<tr><td><code>slice_height</code></td><td class="num">0.015 m</td><td>Height of the slices a stem is traced through.</td><td>Fewer slices: short stems fail (6 slices needed).</td><td>More slices; noisier tracks.</td></tr>
+<tr><td><code>slice_cluster_radius</code></td><td class="num">0.014 m</td><td>Points in a slice within this form one stem cross-section.</td><td>Two close stems merge.</td><td>One stem splits.</td></tr>
+<tr><td><code>track_max_gap</code></td><td class="num">0.075 m</td><td>Largest hidden height gap inside a stem.</td><td>Stems hidden by leaves bridged further.</td><td>Tracks break at hidden parts.</td></tr>
+<tr><td><code>minimum_track_span</code></td><td class="num">0.12 m</td><td>A stem must be traced over at least this height.</td><td>Only tall, clear stems.</td><td>Shorter stems found, but also leaf bits.</td></tr>
+<tr><td><code>minimum_axis_separation</code></td><td class="num">0.035 m</td><td>Extra stems closer than this to an existing one are dropped.</td><td>Close plants and tillers merged.</td><td>Duplicate axes on one stem.</td></tr>
+<tr><td><code>row_max_residual</code></td><td class="num">0.12 m</td><td>Extra stems farther from the fitted row line are rejected.</td><td>Off-row tracks (weeds, leaves) accepted.</td><td>Plants off the line rejected.</td></tr>
+<tr><td><code>stem_tangent_z_min</code></td><td class="num">0.65</td><td>How upright stem points must be.</td><td>Leaning stems missed.</td><td>Leaves count as stem.</td></tr>
+<tr><td><code>stem_linearity_min</code></td><td class="num">0.25</td><td>How line-like stem points must be.</td><td>Fewer stem points.</td><td>More stem points, some from leaves.</td></tr>
+<tr><td><code>minimum_seed_nodes</code></td><td class="num">18</td><td>An axis needs this many own graph points to seed a plant.</td><td>Weak axes dropped.</td><td>Weak axes kept.</td></tr>
+<tr><td><code>labels (connector)</code></td><td class="num">accepted</td><td>Which labels go to the structure step.</td><td>—</td><td>&quot;candidate&quot;: also gap / ambiguous points: more points per plant, more mistakes.</td></tr>
+<tr><td><code>match_max_dist (connector)</code></td><td class="num">0.09 m</td><td>Automatic review: stem axis → register plant within this.</td><td>Axes matched to farther plants (wrong plant possible).</td><td>More axes left blank (not used).</td></tr>
+<tr><td><code>height_scale · graph_voxel (small plants)</code></td><td class="num">0.25 · 0.004 m</td><td>Only for ticked dates with &quot;instance code ×1/4 heights&quot;: scales slice_height, minimum_track_span, track_max_gap.</td><td>Closer to the code&#x27;s defaults (1.0 = defaults).</td><td>Below 1/4 did not find more seedlings in tests.</td></tr></tbody></table></div>
+</section><section id="own">
+<h2>5 · Plant instances: original separation (small-plant dates)</h2>
+<p class="where">Set in: SeparateConfig in pipeline/separate.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>voxel</code></td><td class="num">0.01 m</td><td>Voxel of the plant graph.</td><td>Faster; touching plants merge.</td><td>Slower; thin parts break apart.</td></tr>
+<tr><td><code>seed_radius · seed_hag</code></td><td class="num">0.015 m · 0–0.15 m</td><td>Seeds = voxels this close to the register stem, in this height band.</td><td>Seeds catch neighbours&#x27; stems.</td><td>Seeds miss the stem (alignment error).</td></tr>
+<tr><td><code>seed_search</code></td><td class="num">0.03 m</td><td>Wider search when no seed is found.</td><td>More plants seeded, maybe on a neighbour.</td><td>More plants without seeds (missing).</td></tr>
+<tr><td><code>max_geodesic</code></td><td class="num">1.5 m</td><td>Longest path along the plant surface.</td><td>Far leaf tips reached.</td><td>Long leaves cut off.</td></tr>
+<tr><td><code>orphan_max_dist</code></td><td class="num">0.06 m</td><td>Loose pieces closer than this join the nearest plant.</td><td>More pieces joined, some to the wrong plant.</td><td>More points unassigned.</td></tr>
+<tr><td><code>min_points_present</code></td><td class="num">1500</td><td>Fewer points: plant counted as missing on that date.</td><td>Small plants reported missing.</td><td>Tiny fragments count as plants.</td></tr>
+<tr><td><code>track_max_gap</code></td><td class="num">15 (cm)</td><td>Stem following continues across this many empty 1 cm slices.</td><td>Stems hidden longer are followed.</td><td>Following stops at hidden parts.</td></tr>
+<tr><td><code>axis_seed_frac</code></td><td class="num">0.75</td><td>Lower share of the followed stem used as seeds.</td><td>1.0: LtR_12th IoU 0.72 → 0.49.</td><td>0.5: hidden upper stems lost to neighbours.</td></tr>
+<tr><td><code>whole_leaf_share</code></td><td class="num">0.7</td><td>A piece touching one plant&#x27;s stem this much goes to it entirely.</td><td>Fewer whole-leaf moves.</td><td>More moves, some wrong.</td></tr></tbody></table></div>
+</section><section id="struct">
+<h2>6 · Structure and traits</h2>
+<p class="where">Set in: PipelineConfig in Research_project/copy_of_New_optimized_plant_structure.py (your script); stem radius in pipeline/config.py and pipeline/plants_stage.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>sor_neighbors · sor_std_ratio</code></td><td class="num">20 · 2.0</td><td>Statistical outlier removal.</td><td>Ratio up: keeps more points (more noise).</td><td>Ratio down: removes more, including leaf edges.</td></tr>
+<tr><td><code>ror_radius · ror_min_neighbors</code></td><td class="num">0.012 m · 8</td><td>Radius outlier removal: points with fewer neighbours are noise.</td><td>More neighbours needed: thin leaf edges removed (this filter alone costs ~19 % leaf area).</td><td>Keeps more noise.</td></tr>
+<tr><td><code>voxel_size</code></td><td class="num">0.004 m</td><td>Work cloud thinning.</td><td>Faster; thin leaves lose detail.</td><td>Slower; more detail.</td></tr>
+<tr><td><code>feature_scales</code></td><td class="num">20, 40, 80</td><td>Neighbourhood sizes of the shape features.</td><td>Larger: robust but blurs stem/leaf border.</td><td>Smaller: more detail, more noise.</td></tr>
+<tr><td><code>stem_radial_max</code></td><td class="num">0.0345 m</td><td>Nominal max stem radius.</td><td>Leaf bases near the stem become stem.</td><td>Thick stems partly labelled leaf.</td></tr>
+<tr><td><code>stem_score_threshold</code></td><td class="num">0.58</td><td>Stem score needed for an initial stem point.</td><td>Fewer stem points (stem shorter / thinner).</td><td>Leaf sheaths and bases become stem.</td></tr>
+<tr><td><code>stem_verticality_min · stem_linearity_min</code></td><td class="num">0.55 · 0.35</td><td>Shape gates for stem points.</td><td>Stricter: fewer stem points.</td><td>Looser: leaf points join the stem.</td></tr>
+<tr><td><code>region_grow_normal_sim_min</code></td><td class="num">0.75</td><td>Stem region growing: neighbour joins if normals agree this much.</td><td>Growing stops sooner.</td><td>Stem grows into leaves.</td></tr>
+<tr><td><code>graph_max_edge</code></td><td class="num">0.07 m</td><td>Longest edge in the plant graph.</td><td>Connects across gaps, also to touching leaves.</td><td>Graph breaks; pieces lose their stem link.</td></tr>
+<tr><td><code>laplacian_iterations · laplacian_contract</code></td><td class="num">35 · 0.55</td><td>Skeleton contraction.</td><td>Thinner skeleton; ends may shrink.</td><td>Thick, noisy skeleton.</td></tr>
+<tr><td><code>stem_z_step</code></td><td class="num">0.008 m</td><td>Height slices for the stem centre line.</td><td>Coarser centre line.</td><td>Noisier centre line.</td></tr>
+<tr><td><code>leaf_cluster_eps</code></td><td class="num">0.028 m (adaptive)</td><td>DBSCAN radius for leaf clusters.</td><td>Touching leaves merge: leaf count too low.</td><td>Leaves split into pieces: leaf count too high.</td></tr>
+<tr><td><code>leaf_cluster_min_points</code></td><td class="num">25</td><td>Smallest kept leaf cluster.</td><td>Small young leaves dropped.</td><td>Fragments counted as leaves.</td></tr>
+<tr><td><code>leaf_split_min_angle_deg</code></td><td class="num">40°</td><td>A large cluster is split if it spans this angle around the stem.</td><td>Fewer splits (touching leaves stay one).</td><td>More splits (one leaf may be split).</td></tr>
+<tr><td><code>leaf_width_slice · leaf_width_percentile</code></td><td class="num">0.01 m · 2 %</td><td>Leaf width: spread of side offsets per 1 cm slice.</td><td>Percentile up: narrower, ignores more stray points.</td><td>Percentile down: wider, stray points count.</td></tr>
+<tr><td><code>stem_radius_slice · _min_points · _max</code></td><td class="num">0.02 m · 12 · 0.035 m</td><td>Pipeline&#x27;s stem radius: circle fit per slice, median.</td><td>Slice up: fewer, steadier fits.</td><td>Slice down: more, noisier fits.</td></tr>
+<tr><td><code>SEEDLING_HEIGHT</code></td><td class="num">0.15 m</td><td>Below this plant height no stem radius is reported.</td><td>More plants without stem radius.</td><td>Radius reported for seedlings (scan-noise level).</td></tr>
+<tr><td><code>MIN_SEG_POINTS</code></td><td class="num">800</td><td>Fewer points: plant too small to structure (height only).</td><td>More plants get height only.</td><td>Structure attempted on tiny plants (often fails).</td></tr></tbody></table></div>
+</section><section id="gt">
+<h2>9 · Ground-truth check (optional)</h2>
+<p class="where">Set in: GroundTruthConfig in pipeline/config.py</p>
+<div class="tw"><table>
+<thead><tr><th>Setting</th><th>Default</th><th>What it does</th><th class="up">Increase ↑</th><th class="dn">Decrease ↓</th></tr></thead>
+<tbody><tr><td><code>voxel_size</code></td><td class="num">0.004 m</td><td>Both clouds thinned before IoU.</td><td>IoU less sensitive to density.</td><td>IoU depends more on point density.</td></tr>
+<tr><td><code>iou_tolerance</code></td><td class="num">0.008 m</td><td>A point counts as matched within this distance.</td><td>Higher IoU (more forgiving).</td><td>Lower IoU (stricter).</td></tr>
+<tr><td><code>match_radius · min_match_share</code></td><td class="num">0.015 m · 0.20</td><td>Which predicted plant a GT plant is matched to.</td><td>Easier matches, maybe the wrong plant.</td><td>More GT plants unmatched.</td></tr>
+<tr><td><code>base_fallback_radius</code></td><td class="num">0.15 m</td><td>No overlap: nearest predicted base within this.</td><td>Matches farther plants.</td><td>More GT plants unmatched.</td></tr>
+<tr><td><code>icp_search_radius · icp_max_corr</code></td><td class="num">1.0 m · 0.02 m</td><td>ICP fallback when positions don&#x27;t fit.</td><td>Wider search, slower.</td><td>Narrower search.</td></tr>
+<tr><td><code>min_leaf_iou · fragment_min_share</code></td><td class="num">0.05 · 0.5</td><td>Leaf pairing and fragment counting.</td><td>Fewer leaf pairs / fragments.</td><td>More pairs / fragments.</td></tr></tbody></table></div>
+</section>
+<section id="fixed">
+<h2>Fixed inside the instance code (not settings)</h2>
+<p class="where">gap_segmentation.find_stem_tracks and run_from_las.py. Changing these means editing the code itself.</p>
+<div class="tw"><table><thead><tr><th>Rule</th><th>Value</th><th>Effect</th></tr></thead><tbody>
+<tr><td>slices per stem track</td><td class="num">≥ 6</td><td>With 1.5 cm slices a stem needs ~9 cm of trace; seedlings (4.4 cm) cannot pass.</td></tr>
+<tr><td>graph points per track</td><td class="num">≥ 18</td><td>Thin or short stems with few points are rejected.</td></tr>
+<tr><td>track start</td><td class="num">≤ 16 cm above the lowest points</td><td>Stems that first appear higher (hidden base) are rejected.</td></tr>
+<tr><td>straightness (fit error)</td><td class="num">≤ 2 cm</td><td>Bent or leaning tracks are rejected.</td></tr>
+<tr><td>stem hint clusters</td><td class="num">DBSCAN 5 cm, ≥ 10 points, ≥ 8 cm tall</td><td>Only affects hints (axis source label and row line), not which stems are accepted.</td></tr>
+</tbody></table></div></section>
+<section id="none"><h2>7–8, 10 · Tracking, growth, report</h2>
+<p>No tunable settings. They use the results above. The report's "deviation / error" values come from the run's own ground-truth check, or from defaults measured on 21.06 (pipeline/tolerance.py).</p></section>
+</main></body></html>

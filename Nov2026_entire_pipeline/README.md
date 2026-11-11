@@ -11,6 +11,10 @@ A copy of the maize field pipeline (`../plant_structure_to_leaf_code`, made 10.1
 | 6 structure + traits | user's structure script | same |
 | 7-8 tracking, growth, report, GT check | same | same |
 
+## Flow diagram and settings
+
+[docs/pipeline_flow_and_settings.pdf](docs/pipeline_flow_and_settings.pdf) (also as [HTML](docs/pipeline_flow_and_settings.html)): flow diagram of every step, and one table per step with each setting's default, what it does, and what happens when it is increased or decreased.
+
 ## Running
 
 Same as the original, from this folder and with the same venv:
@@ -112,3 +116,4 @@ All changes are in `Nov2026_entire_pipeline/`; `plant_structure_to_leaf_code/` i
 | 10.11.2026 | Instance code run with its exact settings: 4 mm voxel keys from the LAS header (as `step1_downsample.py`), coordinates and number types as its files, review pass with the full `segment()`, matching distance 9 cm (the code's own gate), unmatched axes left blank, no extra point minimum. | `pipeline/instances_fadly.py` |
 | 10.11.2026 | Small plants option: per-date tick box in the app's scan list and a method choice (original separation, or instance code with heights ×1/4 and a 4 mm graph voxel); `--small-plants` / `--small-method` in the terminal; saved in `run_config.json`. | `ui/app.py`, `pipeline/runner.py`, `pipeline/instances_fadly.py`, `run_pipeline.py` |
 | 11.11.2026 | README with setup, results and this change log. | `README.md` |
+| 11.11.2026 | Flow diagram and settings tables (PDF + HTML). | `docs/` |
